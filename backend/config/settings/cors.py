@@ -23,7 +23,7 @@ CORS_ALLOW_HEADERS = [
 # CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    "https://dds-manager-project-hh.up.railway.app",
+    r"^https://dds-manager-project-hh.up.railway.app$",
     r"^http://127\.0\.0\.1(:\d+)?$",  # локальный сервер
     r"^http://localhost(:\d+)?$",  # локальный сервер с localhost
 ]
