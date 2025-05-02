@@ -22,7 +22,7 @@ CORS_ALLOW_HEADERS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGIN = [
+CORS_ALLOWED_ORIGINS = [
     r"^http://127\.0\.0\.1(:\d+)?$",  # Разрешить все порты для 127.0.0.1
     r"^http://localhost(:\d+)?$",     # Разрешить все порты для localhost
     r"^https://dds-manager-project-hh.up.railway.app$",
