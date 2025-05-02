@@ -13,3 +13,4 @@ router.register(r'cashflows', CashFlowViewSet)
 urlpatterns = [
     path('', include(router.urls)),
 ]
+
