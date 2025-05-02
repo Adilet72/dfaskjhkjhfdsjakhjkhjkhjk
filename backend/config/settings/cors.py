@@ -20,12 +20,11 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGINS = [
-    r"^http://127\.0\.0\.1(:\d+)?$",  # Разрешить все порты для 127.0.0.1
-    r"^http://localhost(:\d+)?$",     # Разрешить все порты для localhost
-    r"^https://dds-manager-project-hh.up.railway.app$",
-    r"^https//dds-manager-project-hh.up.railway.app$"    
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://dds-manager-project-hh.up.railway.app$",  # продакшн
+    r"^http://127\.0\.0\.1(:\d+)?$",  # локальный сервер
+    r"^http://localhost(:\d+)?$",  # локальный сервер с localhost
 ]
 
