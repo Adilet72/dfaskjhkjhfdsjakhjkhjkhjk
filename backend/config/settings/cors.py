@@ -23,7 +23,7 @@ CORS_ALLOW_HEADERS = [
 # CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://django-server-production-8abc.up.railway.app$",
+    r"^http://django-server-production-8abc.up.railway.app$",
     r"^http://127\.0\.0\.1(:\d+)?$",  # локальный сервер
     r"^http://localhost(:\d+)?$",  # локальный сервер с localhost
 ]
