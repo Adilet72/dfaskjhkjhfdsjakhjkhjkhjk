@@ -27,4 +27,8 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://127\.0\.0\.1(:\d+)?$",  # локальный сервер
     r"^http://localhost(:\d+)?$",  # локальный сервер с localhost
 ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://django-server-production-8abc.up.railway.app',
+]
+
 
