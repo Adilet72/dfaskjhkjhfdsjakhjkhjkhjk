@@ -1,67 +1,88 @@
-from rest_framework import viewsets
+import base64
+import json
+import os
+import uuid
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from .serializers import *
-from django.db import models
+from rest_framework import status
+import json
+import requests
+from requests.auth import HTTPBasicAuth
 
-class StatusViewSet(viewsets.ModelViewSet):
-    queryset = Status.objects.all()
-    serializer_class = StatusSerializer
-
-
-class OperationTypeViewSet(viewsets.ModelViewSet):
-    queryset = OperationType.objects.all()
-    serializer_class = OperationTypeSerializer
+CLIENT_ID = '71b92890-bf91-4b6b-9645-6561b93e3d7d'
+SECRET = '3278c7e4-6c0c-4b7b-a8b7-9baadb679504'
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+
+def get_access_token() -> str:
+    url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        'RqUID': str(uuid.uuid4()),  # уникальный идентификатор запроса
+    }
+    payload = {"scope": "GIGACHAT_API_PERS"}
+
+    try:
+        res = requests.post(
+            url=url,
+            headers=headers,
+            auth=HTTPBasicAuth(CLIENT_ID, SECRET),
+            data=payload,
+            verify=False,  # Убедитесь, что использование verify=False безопасно для вашей среды
+        )
+        res.raise_for_status()  # проверка на наличие ошибок
+        access_token = res.json().get("access_token")
+        if not access_token:
+            raise ValueError("Токен доступа не был получен.")
+        return access_token
+    except requests.RequestException as e:
+        print("Ошибка при получении access token:", e)
+        return None
 
 
-class SubcategoryViewSet(viewsets.ModelViewSet):
-    queryset = Subcategory.objects.all()
-    serializer_class = SubcategorySerializer
+def send_prompt(msg: str, access_token: str):
+    url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
+    payload = json.dumps({
+        "model": "GigaChat",
+        "messages": [
+            {
+                "role": "user",
+                "content": msg,
+            }
+        ],
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {access_token}'
+    }
+
+    try:
+        response = requests.post(url, headers=headers, data=payload, verify=False)
+        response.raise_for_status()  # проверка на наличие ошибок
+        return response.json()["choices"][0]["message"]["content"]
+    except requests.RequestException as e:
+        print("Ошибка при отправке запроса к GigaChat API:", e)
+        return "Ошибка при получении ответа от GigaChat."
 
 
-class CashFlowViewSet(viewsets.ModelViewSet):
-    queryset = CashFlow.objects.all()
-    serializer_class = CashFlowSerializer
+def sent_prompt_and_get_response(msg: str):
+    access_token = get_access_token()
+    message = msg
+    if access_token:
+        response = send_prompt(message, access_token)
+        decorated_response = f'{response}'
+        return decorated_response
+    else:
+        return "Не удалось получить access token."
 
-    def get_queryset(self):
-        queryset = CashFlow.objects.all()
-        status = self.request.query_params.get('status', None)
-        if status:
-            queryset = queryset.filter(status__id=status)
 
-        operation_type = self.request.query_params.get('operation_type', None)
-        if operation_type:
-            queryset = queryset.filter(operation_type__id=operation_type)
+class SendPromptAPIView(APIView):
+    def post(self, request):
+        prompt = request.data.get('prompt')
+        if not prompt:
+            return Response({'error': 'Поле prompt обязательно'}, status=status.HTTP_400_BAD_REQUEST)
 
-        category = self.request.query_params.get('category', None)
-        if category:
-            queryset = queryset.filter(category__id=category)
-
-        return queryset
-
-    @action(detail=False, methods=['get'])
-    def statistics(self, request):
-        status = request.query_params.get('status', None)
-        operation_type = request.query_params.get('operation_type', None)
-        category = request.query_params.get('category', None)
-        queryset = CashFlow.objects.all()
-        if status:
-            queryset = queryset.filter(status__id=status)
-        if operation_type:
-            queryset = queryset.filter(operation_type__id=operation_type)
-        if category:
-            queryset = queryset.filter(category__id=category)
-        total_amount = queryset.aggregate(total_amount=models.Sum('amount'))
-
-        return Response(total_amount)
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-    def perform_update(self, serializer):
-        serializer.save()
+        result = sent_prompt_and_get_response(prompt)
+        return Response({'response': result}, status=status.HTTP_200_OK)
