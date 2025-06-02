@@ -1,4 +1,3 @@
-
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -20,15 +19,17 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
 # CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://django-server-production-8abc.up.railway.app$",
     r"^http://127\.0\.0\.1(:\d+)?$",  # локальный сервер
     r"^http://localhost(:\d+)?$",  # локальный сервер с localhost
+    r"^https://adilet72\.github\.io/Islam-ai-checkar-ts/?$",  # GitHub Pages
 ]
+
 CSRF_TRUSTED_ORIGINS = [
     'https://django-server-production-8abc.up.railway.app',
+    'https://adilet72.github.io',
 ]
-
-
